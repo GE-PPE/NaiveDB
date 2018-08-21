@@ -10,15 +10,13 @@ type NaiveDB struct {
 
 // New NaiveDB
 func New(Directory string) NaiveDB {
-	return NaiveDB{Directory, nil}
-}
-
-func (db NaiveDB) Connect() {
+	db := NaiveDB{Directory, nil}
 	fp, err := os.Create(findDatabaseFile(db.Directory))
 	if err != nil {
 		panic(err)
 	}
 	db.filePointer = fp
+	return db
 }
 
 func findDatabaseFile(directory string) string {
