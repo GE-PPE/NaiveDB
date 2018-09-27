@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"io"
 	"net"
-	"strings"
+
+	"../parser"
 )
 
 func checkError(err error) {
@@ -30,35 +31,25 @@ func handleConn(conn net.Conn, m map[string]string) {
 			}
 			return
 		}
-		fmt.Println(string(buffer))
 
-		str := string(buffer[:bytesRead])
-		splittedStr := strings.Fields(str)
-		if len(splittedStr) < 2 {
-			fmt.Println("Malformed")
+		line := string(buffer[:bytesRead])
+		parseResult, err := parser.Parse(line)
+		if err != nil {
+			conn.Write([]byte(err.Error() + "\n"))
 			continue
 		}
-		key := splittedStr[1]
+		fmt.Println(parseResult)
 
-		if splittedStr[0] == "get" {
-			value := m[key]
-			conn.Write([]byte(value + "\n"))
-			fmt.Println(m[key])
+		switch parseResult.Command {
+		case parser.GetCommand:
+			conn.Write([]byte(m[parseResult.Key] + "\n"))
 			fmt.Println("received a get request")
-		} else if splittedStr[0] == "set" {
-			if len(splittedStr) < 3 {
-				fmt.Println("Malformed")
-			}
-			value := splittedStr[2]
-			m[key] = value
+		case parser.SetCommand:
+			m[parseResult.Key] = parseResult.Value
 			conn.Write([]byte("OK\n"))
-			fmt.Println("received a set request")
-		} else if splittedStr[0] == "delete" {
-			m[key] = ""
+		case parser.DeleteCommand:
+			delete(m, parseResult.Key)
 			conn.Write([]byte("OK\n"))
-			fmt.Println("received a delete request")
-		} else {
-			fmt.Println("received anything")
 		}
 	}
 }
