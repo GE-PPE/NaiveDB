@@ -75,8 +75,8 @@ func main() {
 		conn, err := listener.Accept()
 		if err != nil {
 			conn.Close()
+		} else {
+			go handleConn(conn, m)
 		}
-
-		go handleConn(conn, m)
 	}
 }
