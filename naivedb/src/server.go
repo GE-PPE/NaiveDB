@@ -32,8 +32,8 @@ func handleConn(conn net.Conn, m map[string]string) {
 		}
 		fmt.Println(string(buffer))
 
-		str := string(buffer)
-		splittedStr := strings.Split(str, " ")
+		str := string(buffer[:bytesRead])
+		splittedStr := strings.Fields(str)
 		if len(splittedStr) < 2 {
 			fmt.Println("Malformed")
 			continue
@@ -42,7 +42,7 @@ func handleConn(conn net.Conn, m map[string]string) {
 
 		if splittedStr[0] == "get" {
 			value := m[key]
-			conn.Write([]byte(value))
+			conn.Write([]byte(value + "\n"))
 			fmt.Println(m[key])
 			fmt.Println("received a get request")
 		} else if splittedStr[0] == "set" {
