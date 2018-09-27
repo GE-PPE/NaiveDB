@@ -14,7 +14,6 @@ func checkError(err error) {
 }
 
 func handleConn(conn net.Conn, m map[string]string) {
-	defer conn.Close()
 
 	buffer := make([]byte, 4096)
 
@@ -76,7 +75,10 @@ func main() {
 		if err != nil {
 			conn.Close()
 		} else {
-			go handleConn(conn, m)
+			go func() {
+				handleConn(conn, m)
+				conn.Close()
+			}()
 		}
 	}
 }
