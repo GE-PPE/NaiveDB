@@ -1,4 +1,4 @@
-package main
+package parser
 
 import (
 	"fmt"
@@ -20,7 +20,7 @@ const (
 
 	commandParseState parseState = 0
 	keyParseState     parseState = 1
-	valueparseState   parseState = 2
+	valueParseState   parseState = 2
 	errorParseState   parseState = 3
 )
 
@@ -31,9 +31,9 @@ var tokenToCommand = map[parseToken]Command{
 }
 
 type ParseResult struct {
-	command Command
-	key     string
-	value   string
+	Command Command
+	Key     string
+	Value   string
 }
 
 type parseError struct {
@@ -56,20 +56,28 @@ func Parse(line string) (*ParseResult, error) {
 		switch state {
 		case commandParseState:
 			if command, ok := tokenToCommand[parseToken(word)]; ok {
-				result.command = command
+				result.Command = command
 				state = keyParseState
 			} else {
 				return nil, &parseError{word, "invalid command"}
 			}
 		case keyParseState:
-			result.key = word
-			state = valueparseState
-		case valueparseState:
-			result.value = word
+			result.Key = word
+			state = valueParseState
+		case valueParseState:
+			if result.Command != SetCommand {
+				return nil, &parseError{word, "invalid argument length"}
+			}
+			result.Value = word
 			state = errorParseState
 		default:
 			return nil, &parseError{word, "invalid argument length"}
 		}
+	}
+	if state == keyParseState {
+		return nil, &parseError{"", "invalid argument length"}
+	} else if result.Command == SetCommand && state == valueParseState {
+		return nil, &parseError{"", "invalid argument length"}
 	}
 	return &result, nil
 }
