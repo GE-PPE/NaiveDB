@@ -5,7 +5,7 @@ import (
 	"io"
 	"net"
 
-	"./parser"
+	"../parser"
 )
 
 func checkError(err error) {
@@ -32,31 +32,17 @@ func handleConn(conn net.Conn, m map[string]string) {
 			return
 		}
 
-<<<<<<< HEAD:naivedb/server.go
 		line := string(buffer[:bytesRead])
 		parseResult, err := parser.Parse(line)
 		if err != nil {
 			conn.Write([]byte(err.Error() + "\n"))
-=======
-		str := string(buffer[:bytesRead])
-		splittedStr := strings.Fields(str)
-		if len(splittedStr) < 2 {
-			fmt.Println("Malformed")
->>>>>>> 4dd1bb8d0f85d1cfacc67c0a61970ee23c59fd9a:naivedb/src/server.go
 			continue
 		}
 		fmt.Println(parseResult)
 
-<<<<<<< HEAD:naivedb/server.go
 		switch parseResult.Command {
 		case parser.GetCommand:
 			conn.Write([]byte(m[parseResult.Key] + "\n"))
-=======
-		if splittedStr[0] == "get" {
-			value := m[key]
-			conn.Write([]byte(value + "\n"))
-			fmt.Println(m[key])
->>>>>>> 4dd1bb8d0f85d1cfacc67c0a61970ee23c59fd9a:naivedb/src/server.go
 			fmt.Println("received a get request")
 		case parser.SetCommand:
 			m[parseResult.Key] = parseResult.Value
