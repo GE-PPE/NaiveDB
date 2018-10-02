@@ -57,7 +57,7 @@ func handleConn(conn net.Conn, db *database.NaiveDB) {
 }
 
 func main() {
-	db := database.New("")
+	db := database.New("/tmp/testdatabase.db")
 	listener, err := net.Listen("tcp", ":6442")
 
 	checkError(err)
