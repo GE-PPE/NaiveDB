@@ -43,15 +43,27 @@ func handleConn(conn net.Conn, db *database.NaiveDB) {
 
 		switch parseResult.Command {
 		case parser.GetCommand:
-			value, _ := db.Get(parseResult.Key)
-			conn.Write([]byte(value + "\n"))
+			value, ok := db.Get(parseResult.Key)
+			if ok {
+				conn.Write([]byte(value + "\n"))
+			} else {
+				conn.Write([]byte("FAIL\n"))
+			}
 			fmt.Println("received a get request")
 		case parser.SetCommand:
-			db.Set(parseResult.Key, parseResult.Value)
-			conn.Write([]byte("OK\n"))
+			ok := db.Set(parseResult.Key, parseResult.Value)
+			if ok {
+				conn.Write([]byte("OK\n"))
+			} else {
+				conn.Write([]byte("FAIL\n"))
+			}
 		case parser.DeleteCommand:
-			db.Delete(parseResult.Key)
-			conn.Write([]byte("OK\n"))
+			ok := db.Delete(parseResult.Key)
+			if ok {
+				conn.Write([]byte("OK\n"))
+			} else {
+				conn.Write([]byte("FAIL\n"))
+			}
 		}
 	}
 }
