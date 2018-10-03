@@ -28,24 +28,24 @@ func TestShowcase(t *testing.T) {
 	reader := bufio.NewReader(conn)
 
 	for _, pair := range tests {
-		fmt.Fprintf(conn, fmt.Sprintf("set %s %s", pair.Key, pair.Value))
+		fmt.Fprintf(conn, "set %s %s", pair.Key, pair.Value)
 		message, err := reader.ReadString('\n')
-		message = strings.TrimSpace(message)
 		if err != nil {
 			t.FailNow()
 		}
+		message = strings.TrimSpace(message)
 		if message != "OK" {
 			t.Error(
 				"Did not return OK on set operation",
 			)
 		}
 
-		fmt.Fprintf(conn, fmt.Sprintf("get %s", pair.Key))
+		fmt.Fprintf(conn, "get %s", pair.Key)
 		message, err = reader.ReadString('\n')
-		message = strings.TrimSpace(message)
 		if err != nil {
 			t.FailNow()
 		}
+		message = strings.TrimSpace(message)
 		if message != pair.Value {
 			t.Error(
 				"For", pair.Key,
@@ -54,12 +54,12 @@ func TestShowcase(t *testing.T) {
 			)
 		}
 
-		fmt.Fprintf(conn, fmt.Sprintf("delete %s", pair.Key))
+		fmt.Fprintf(conn, "delete %s", pair.Key)
 		message, err = reader.ReadString('\n')
-		message = strings.TrimSpace(message)
 		if err != nil {
 			t.FailNow()
 		}
+		message = strings.TrimSpace(message)
 		if message != "OK" {
 			t.Error(
 				"Did not return OK on delete operation",
