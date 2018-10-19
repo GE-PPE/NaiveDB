@@ -5,6 +5,7 @@ import (
 	"io"
 	"net"
 
+	"../database"
 	"../parser"
 )
 
@@ -14,7 +15,7 @@ func checkError(err error) {
 	}
 }
 
-func handleConn(conn net.Conn, m map[string]string) {
+func handleConn(conn net.Conn, db *database.NaiveDB) {
 
 	buffer := make([]byte, 4096)
 
@@ -42,20 +43,33 @@ func handleConn(conn net.Conn, m map[string]string) {
 
 		switch parseResult.Command {
 		case parser.GetCommand:
-			conn.Write([]byte(m[parseResult.Key] + "\n"))
+			value, ok := db.Get(parseResult.Key)
+			if ok {
+				conn.Write([]byte(value + "\n"))
+			} else {
+				conn.Write([]byte("FAIL\n"))
+			}
 			fmt.Println("received a get request")
 		case parser.SetCommand:
-			m[parseResult.Key] = parseResult.Value
-			conn.Write([]byte("OK\n"))
+			ok := db.Set(parseResult.Key, parseResult.Value)
+			if ok {
+				conn.Write([]byte("OK\n"))
+			} else {
+				conn.Write([]byte("FAIL\n"))
+			}
 		case parser.DeleteCommand:
-			delete(m, parseResult.Key)
-			conn.Write([]byte("OK\n"))
+			ok := db.Delete(parseResult.Key)
+			if ok {
+				conn.Write([]byte("OK\n"))
+			} else {
+				conn.Write([]byte("FAIL\n"))
+			}
 		}
 	}
 }
 
 func main() {
-	m := make(map[string]string)
+	db := database.New("/tmp/testdatabase.db")
 	listener, err := net.Listen("tcp", ":6442")
 
 	checkError(err)
@@ -67,7 +81,7 @@ func main() {
 			conn.Close()
 		} else {
 			go func() {
-				handleConn(conn, m)
+				handleConn(conn, db)
 				conn.Close()
 			}()
 		}
