@@ -85,6 +85,8 @@ func (db *NaiveDB) Set(key, value string) bool {
 	oldValue := db.database[key]
 
 	dataFile, err := os.Create(db.filePath)
+	defer dataFile.Close()
+
 	if err != nil {
 		return false
 	}
@@ -103,7 +105,6 @@ func (db *NaiveDB) Set(key, value string) bool {
 		db.database[key] = oldValue
 		return false
 	}
-	dataFile.Close()
 
 	return true
 }
@@ -116,6 +117,8 @@ func (db *NaiveDB) Delete(key string) bool {
 	oldValue := db.database[key]
 
 	dataFile, err := os.Create(db.filePath)
+	defer dataFile.Close()
+
 	if err != nil {
 		return false
 	}
@@ -133,7 +136,6 @@ func (db *NaiveDB) Delete(key string) bool {
 		db.database[key] = oldValue
 		return false
 	}
-	dataFile.Close()
 
 	return true
 }
