@@ -34,6 +34,20 @@ func handleConn(conn net.Conn, db *database.NaiveDB) {
 		}
 
 		line := string(buffer[:bytesRead])
+		if parser.IsPossibleMetaCommand(line) {
+			parseMetaResult, err := parser.ParseMeta(line)
+
+			if err != nil {
+				conn.Write([]byte(err.Error() + "\n"))
+			}
+
+			switch parseMetaResult.MetaCommand {
+			case parser.ExitMetaCommand:
+				fmt.Println("Received .exit, disconnecting user")
+				return
+			}
+		}
+
 		parseResult, err := parser.Parse(line)
 		if err != nil {
 			conn.Write([]byte(err.Error() + "\n"))
